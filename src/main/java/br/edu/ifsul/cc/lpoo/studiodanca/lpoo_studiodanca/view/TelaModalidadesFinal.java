@@ -136,10 +136,14 @@ public class TelaModalidadesFinal extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnNovoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNovoActionPerformed
-        TelaCadastroModalidade telaCadastro = new TelaCadastroModalidade(this, true);
-        
-        telaCadastro.setVisible(true);
-        
+        Modalidade m = new Modalidade();
+        m.setDescricao(JOptionPane.showInputDialog("Informe a descrição da modalidade:"));
+
+        jpa = new PersistenciaJPA();
+        jpa.conexaoAberta();
+        jpa.persist(m);
+        jpa.fecharConexao();
+
         listarModalidades();
     }//GEN-LAST:event_btnNovoActionPerformed
 
@@ -181,7 +185,7 @@ public class TelaModalidadesFinal extends javax.swing.JFrame {
 
             telaCadastro.setVisible(true);
 
-            listarModalidades();
+            listarModalidades();    
 
         }
     }//GEN-LAST:event_btnEditarActionPerformed
