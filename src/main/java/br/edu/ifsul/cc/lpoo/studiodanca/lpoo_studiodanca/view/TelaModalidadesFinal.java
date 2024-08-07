@@ -31,8 +31,8 @@ public class TelaModalidadesFinal extends javax.swing.JFrame {
         lstModalidades.clearSelection();
         jpa = new PersistenciaJPA();
         jpa.conexaoAberta();
-        List<Modalidade> lista = jpa.getModalidades();
-        System.out.println("Lista: " + lista);
+        List<Modalidade> lista = jpa.getModalidades("Lista: ");
+        System.out.println(lista);
         DefaultListModel modeloLista = new DefaultListModel<>();
         for (Modalidade m : lista) {
             modeloLista.addElement(m);
@@ -58,6 +58,8 @@ public class TelaModalidadesFinal extends javax.swing.JFrame {
         btnNovo = new javax.swing.JButton();
         btnEditar = new javax.swing.JButton();
         btnRemover = new javax.swing.JButton();
+        jLabel2 = new javax.swing.JLabel();
+        txtBusca = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -93,7 +95,7 @@ public class TelaModalidadesFinal extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(btnNovo, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 41, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 63, Short.MAX_VALUE)
                 .addComponent(btnEditar, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(39, 39, 39)
                 .addComponent(btnRemover))
@@ -109,25 +111,51 @@ public class TelaModalidadesFinal extends javax.swing.JFrame {
                 .addContainerGap(19, Short.MAX_VALUE))
         );
 
+        jLabel2.setText("Descrição:");
+
+        txtBusca.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtBuscaActionPerformed(evt);
+            }
+        });
+        txtBusca.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtBuscaKeyReleased(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(15, 15, 15)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel1)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(txtBusca))))
                     .addComponent(jScrollPane1)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(28, Short.MAX_VALUE))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(30, Short.MAX_VALUE)
+                .addGap(15, 15, 15)
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 22, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtBusca, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel2))
+                .addGap(28, 28, 28)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
@@ -174,21 +202,51 @@ public class TelaModalidadesFinal extends javax.swing.JFrame {
     }//GEN-LAST:event_btnRemoverActionPerformed
 
     private void btnEditarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditarActionPerformed
-        Modalidade modalidadeSelecionada
-                = lstModalidades.getSelectedValue();
+        Modalidade modalidadeSelecionada = lstModalidades.getSelectedValue();
         if (modalidadeSelecionada != null) {
-            
-            // Edição da Modalidade em Tela de Cadastro
-            TelaCadastroModalidade telaCadastro = new TelaCadastroModalidade(this, true);
-            
-// FALTA ENVIAR MODALIDADE SELECIONADA PARA TELA DE CADASTRO
-
-            telaCadastro.setVisible(true);
-
-            listarModalidades();    
-
+            try {
+                jpa = new PersistenciaJPA();
+                jpa.conexaoAberta();
+                TelaCadastroModalidade telaCadastro = new TelaCadastroModalidade(this, true);
+                telaCadastro.setModalidade(modalidadeSelecionada);
+                telaCadastro.setVisible(true);
+                listarModalidades();
+            } catch (Exception e) {
+                System.err.println("Erro ao editar modalidade: " + e.getMessage());
+            } finally {
+                jpa.fecharConexao();
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Selecione uma modalidade para editar");
         }
     }//GEN-LAST:event_btnEditarActionPerformed
+
+    private void txtBuscaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtBuscaActionPerformed
+        // TODO add your handling code here:
+        
+    }//GEN-LAST:event_txtBuscaActionPerformed
+
+    private void txtBuscaKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtBuscaKeyReleased
+        // TODO add your handling code here:
+        String textoBusca = txtBusca.getText().trim();
+        
+        if(textoBusca.isEmpty()){
+            listarModalidades();
+            return;
+        }
+        
+        lstModalidades.clearSelection();
+        jpa = new PersistenciaJPA();
+        jpa.conexaoAberta();
+        List<Modalidade> lista = jpa.getModalidades(textoBusca);
+        System.out.println("Lista: " + lista);
+        DefaultListModel modeloLista = new DefaultListModel<>();
+        for (Modalidade m : lista) {
+            modeloLista.addElement(m);
+        }
+        lstModalidades.setModel(modeloLista);
+        jpa.fecharConexao();
+    }//GEN-LAST:event_txtBuscaKeyReleased
 
     /**
      * @param args the command line arguments
@@ -231,8 +289,10 @@ public class TelaModalidadesFinal extends javax.swing.JFrame {
     private javax.swing.JButton btnNovo;
     private javax.swing.JButton btnRemover;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JList<Modalidade> lstModalidades;
+    private javax.swing.JTextField txtBusca;
     // End of variables declaration//GEN-END:variables
 }

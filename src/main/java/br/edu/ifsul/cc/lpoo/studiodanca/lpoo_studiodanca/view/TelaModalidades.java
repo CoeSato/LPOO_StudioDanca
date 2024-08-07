@@ -31,8 +31,8 @@ public class TelaModalidades extends javax.swing.JFrame {
         lstModalidades.clearSelection();
         jpa = new PersistenciaJPA();
         jpa.conexaoAberta();
-        List<Modalidade> lista = jpa.getModalidades();
-        System.out.println("Lista: " + lista);
+        List<Modalidade> lista = jpa.getModalidades("Lista: ");
+        System.out.println(lista);
         DefaultListModel modeloLista = new DefaultListModel<>();
         for (Modalidade m : lista) {
             modeloLista.addElement(m);

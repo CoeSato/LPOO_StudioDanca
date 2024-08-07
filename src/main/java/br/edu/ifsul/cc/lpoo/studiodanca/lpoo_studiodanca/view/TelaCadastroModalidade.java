@@ -8,6 +8,8 @@ import br.edu.ifsul.cc.lpoo.studiodanca.lpoo_studiodanca.dao.PersistenciaJPA;
 import br.edu.ifsul.cc.lpoo.studiodanca.lpoo_studiodanca.model.Modalidade;
 import br.edu.ifsul.cc.lpoo.studiodanca.lpoo_studiodanca.model.Professor;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
 
@@ -25,7 +27,6 @@ public class TelaCadastroModalidade extends javax.swing.JDialog {
         super(parent, modal);
         initComponents();
         listarProfessores();
-        listarModalidades();
     }
     
     public void listarProfessores(){
@@ -39,19 +40,6 @@ public class TelaCadastroModalidade extends javax.swing.JDialog {
         }
         jpa.fecharConexao();
         
-    }
-    
-    public void listarModalidades() {
-        cmbModalidades.removeAllItems();
-        
-        jpa = new PersistenciaJPA();
-        jpa.conexaoAberta();
-        List<Modalidade> lista = jpa.getModalidades();
-        for(Modalidade o: lista){
-            cmbModalidades.addItem(o);
-        }
-        jpa.fecharConexao();
-
     }
 
     /**
@@ -70,8 +58,6 @@ public class TelaCadastroModalidade extends javax.swing.JDialog {
         cmbProfessores = new javax.swing.JComboBox<>();
         btnSalvar = new javax.swing.JButton();
         btnCancelar = new javax.swing.JButton();
-        jLabel4 = new javax.swing.JLabel();
-        cmbModalidades = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -101,14 +87,6 @@ public class TelaCadastroModalidade extends javax.swing.JDialog {
             }
         });
 
-        jLabel4.setText("Modalidades Cadastradas:");
-
-        cmbModalidades.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmbModalidadesActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -132,11 +110,8 @@ public class TelaCadastroModalidade extends javax.swing.JDialog {
                                     .addComponent(jLabel3))
                                 .addGap(0, 0, Short.MAX_VALUE)))
                         .addContainerGap())))
-            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                .addGroup(layout.createSequentialGroup()
-                    .addComponent(jLabel4)
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addComponent(cmbModalidades, javax.swing.GroupLayout.PREFERRED_SIZE, 189, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(144, 144, 144)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtDescricao, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(cmbProfessores, javax.swing.GroupLayout.PREFERRED_SIZE, 189, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -154,11 +129,7 @@ public class TelaCadastroModalidade extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(cmbProfessores, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4)
-                    .addComponent(cmbModalidades, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 37, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 49, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnSalvar)
                     .addComponent(btnCancelar))
@@ -170,33 +141,31 @@ public class TelaCadastroModalidade extends javax.swing.JDialog {
 
     private void btnSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalvarActionPerformed
         // Criando nova modalidade
-       if(modalidade == null){
-           modalidade = new Modalidade();
-           modalidade.setDescricao(txtDescricao.getText());
-           modalidade.setProfessor((Professor)cmbProfessores.getSelectedItem());
-           
-           jpa = new PersistenciaJPA();
-            jpa.conexaoAberta();
-            jpa.persist(modalidade);
-            jpa.fecharConexao();
-            dispose();
-           
-       } else {
-           // Edição da modalidade -- Atividade para dia 07-08
-           try {
-                modalidade.setDescricao(txtDescricao.getText());
-                modalidade.setProfessor((Professor)cmbProfessores.getSelectedItem());
+        try {
 
-                jpa = new PersistenciaJPA();
-                jpa.conexaoAberta();
-                jpa.persist(modalidade);
-                jpa.fecharConexao();
-                dispose();
-            } catch (Exception e) {
-            } finally {
-                jpa.fecharConexao();
+            jpa = new PersistenciaJPA();
+            jpa.conexaoAberta();
+
+            // Busque a entidade gerenciada
+            Modalidade modalidadeGerenciada = null;
+            if (modalidade != null && modalidade.getId() != null) {
+                modalidadeGerenciada = (Modalidade) jpa.find(Modalidade.class, modalidade.getId());
             }
-       }
+
+            if (modalidadeGerenciada == null) {
+                modalidadeGerenciada = new Modalidade();
+            }
+            modalidadeGerenciada.setDescricao(txtDescricao.getText());
+            modalidadeGerenciada.setProfessor((Professor) cmbProfessores.getSelectedItem());
+
+            jpa.merge(modalidadeGerenciada);
+            JOptionPane.showMessageDialog(this, "Modalidade salva com sucesso!");
+            dispose();
+        } catch (Exception ex) {
+            Logger.getLogger(TelaCadastroModalidade.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            jpa.fecharConexao();
+        }
     }//GEN-LAST:event_btnSalvarActionPerformed
 
     private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
@@ -206,10 +175,6 @@ public class TelaCadastroModalidade extends javax.swing.JDialog {
     private void cmbProfessoresActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbProfessoresActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_cmbProfessoresActionPerformed
-
-    private void cmbModalidadesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbModalidadesActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_cmbModalidadesActionPerformed
 
     /**
      * @param args the command line arguments
@@ -258,13 +223,10 @@ public class TelaCadastroModalidade extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancelar;
     private javax.swing.JButton btnSalvar;
-    private javax.swing.JComboBox<Modalidade> cmbModalidades;
     private javax.swing.JComboBox<Professor> cmbProfessores;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTextField txtDescricao;
     // End of variables declaration//GEN-END:variables
 

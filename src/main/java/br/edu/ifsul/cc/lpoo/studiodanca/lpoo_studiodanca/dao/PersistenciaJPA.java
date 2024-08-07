@@ -91,12 +91,18 @@ public class PersistenciaJPA implements InterfacePersistencia {
             throw e;
         }
     }
+    
+    public void merge(Object o) throws Exception {
+    entity.getTransaction().begin();
+    entity.merge(o);
+    entity.getTransaction().commit();
+}
 
-    public List<Modalidade> getModalidades() {
+    public List<Modalidade> getModalidades(String texto) {
         EntityManager em = getEntityManager();
         try {
-            TypedQuery<Modalidade> query = 
-                    em.createQuery("SELECT m FROM Modalidade m", Modalidade.class);
+            TypedQuery<Modalidade> query = em.createQuery("SELECT m FROM Modalidade m WHERE LOWER(m.descricao) Like :descricao", Modalidade.class);
+            query.setParameter("descricao", "%"+texto.toLowerCase()+"%");
             return query.getResultList();
         } catch (Exception e) {
             e.printStackTrace();
